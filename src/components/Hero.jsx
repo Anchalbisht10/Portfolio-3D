@@ -8,7 +8,7 @@ const Hero = () => {
   return (
     <section className={`relative w-full min-h-screen mx-auto overflow-hidden`}>
       <div
-  className={`absolute inset-0 top-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-col sm:flex-row items-start gap-5`}
+  className={`absolute inset-0 top-[340px] max-w-7xl left-[190px] mx-auto ${styles.paddingX} flex flex-col sm:flex-row items-start gap-5`}
 >
         <div className='flex flex-col justify-center items-center mt-5'>
           <div className='w-5 h-5 rounded-full bg-[#915EFF]' />
@@ -16,10 +16,10 @@ const Hero = () => {
         </div>
 
 
-   <div className="max-w-[600px]">
+   <div className="max-w-[600px] ">
     <br></br>
   {/* <h1 className={`hidden sm:block ${styles.heroHeadText} text-white text-[48px]`}> */}
-  <h1 className={`${styles.heroHeadText} text-white text-[36px] sm:text-[48px] hidden md:block`}>
+  <h1 className={`${styles.heroHeadText} text-white text-[36px] sm:text-[48px] `}>
     Hi, I'm <span className='text-[#915EFF]'>Anchal Bisht</span>
   </h1>
 
@@ -42,7 +42,7 @@ const Hero = () => {
 
 
 
-<div className="absolute top-[170px] right-[150px] sm:right-[330opx]">
+<div className="absolute top-[170px] right-[200px] sm:right-[330opx]">
 
   <div className="p-2 rounded-2xl shadow-[0_0_25px_rgba(145,94,255,0.4)]">
     <img
@@ -55,7 +55,7 @@ const Hero = () => {
 
 
 
-<div className='absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center sm:justify-center'>
+<div className='absolute xs:bottom-10 bottom-32 w-full flex justify-center items-center sm:justify-center right-[470px] top-[785px]'>
         <a href='#about'>
           <div className='w-[50px] h-[80px] rounded-3xl border-4 border-secondary flex justify-center items-start p-2'>
             <motion.div

@@ -49,13 +49,13 @@ const ExperienceCard = ({ experience }) => {
     </h3>
     <p className='text-secondary text-[16px] font-semibold'>
       {experience.company_name}
-    </p>
-  </div>
-
-  {experience.certificate && (
+  &nbsp;
+      &nbsp;
+      &nbsp;
+       {experience.certificate && (
     <button
       onClick={() => window.open(experience.certificate, "_blank")}
-      className="text-xs px-3 py-1 bg-black text-white rounded-full 
+      className="text-xs px-2 py-2 bg-black text-white rounded-full 
         border border-purple-500 shadow-sm 
           hover:bg-purple-600 hover:shadow-md 
            transition-all duration-300"
@@ -63,7 +63,13 @@ const ExperienceCard = ({ experience }) => {
       View Certificate
     </button>
   )}
+    </p>
+   
+  </div>
+
 </div>
+
+
 
       <ul className='mt-5 list-disc ml-5 space-y-2'>
         {experience.points.map((point, index) => (
