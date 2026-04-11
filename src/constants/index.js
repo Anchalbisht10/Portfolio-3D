@@ -373,26 +373,26 @@ const projects = [
     source_code_link: "https://github.com/Anchalbisht10/quiz-app",
   },
     {
-    name: "Movie-box",
+    name: "Portfolio",
     description:
-      "“Dynamic movie search application built with React that integrates external APIs to fetch and display real-time movie data, allowing users to explore movie details through a fast, responsive, and user-friendly interface",
+      "A modern, fully responsive developer portfolio built with React, Three.js, and Tailwind CSS to showcase my projects, skills, and experience with smooth animations and interactive UI.",
     tags: [
       {
         name: "react",
         color: "blue-text-gradient",
       },
       {
-        name: "css",
+        name: "three js",
         color: "green-text-gradient",
       },
       {
-        name: "html",
+        name: "tailwind css",
         color: "pink-text-gradient",
       },
     ],
-    image:"/projects/movie.png",
-    live_link: "https://your-live-site.com",
-    source_code_link: "https://github.com/Anchalbisht10/movie-search-react",
+    image:"/projects/portfolio.png",
+    live_link: "https://portfolio-3-d-u19m.vercel.app/",
+    source_code_link: "https://github.com/Anchalbisht10/Portfolio-3D",
   },
 ];
 
