@@ -382,7 +382,7 @@ const projects = [
         color: "blue-text-gradient",
       },
       {
-        name: "three js",
+        name: "three.js",
         color: "green-text-gradient",
       },
       {
