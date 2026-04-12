@@ -30,11 +30,9 @@ const ProjectCard = ({
 <div className='bg-tertiary p-5 rounded-2xl w-full sm:w-[360px]'>
 
         <div className='relative w-full h-[230px]'>
-          <img
-            src={image}
-            alt='project_image'
-            className='w-full h-full object-cover rounded-2xl'
-          />
+         <div className="w-full h-full rounded-2xl bg-gray-700 flex items-center justify-center text-white">
+  Project Preview
+</div>
 
           <div className='absolute inset-0 flex justify-end m-3 card-img_hover'>
             
