@@ -41,7 +41,8 @@ const Hero = () => {
   </div>
 </div>
 
-{/* <CertificateButton link="/certificates/accenture.pdf" /> */}
+{/* <CertificateButton link="/certificates/accenture.pdf" /> 
+now of no use*/}
 
 
 
