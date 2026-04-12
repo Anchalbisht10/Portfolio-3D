@@ -18,7 +18,7 @@ const ProjectCard = ({
   live_link,
 }) => {
   return (
-    <motion.div variants={fadeIn("up", "spring", index * 0.5, 0.75)}>
+    <div>
       {/* <Tilt
         options={{
           max: 45,
@@ -30,9 +30,11 @@ const ProjectCard = ({
 <div className='bg-tertiary p-5 rounded-2xl w-full sm:w-[360px]'>
 
         <div className='relative w-full h-[230px]'>
-         <div className="w-full h-full rounded-2xl bg-gray-700 flex items-center justify-center text-white">
-  Project Preview
-</div>
+          <img
+            src={image}
+            alt='project_image'
+            className='w-full h-full object-cover rounded-2xl'
+          />
 
           <div className='absolute inset-0 flex justify-end m-3 card-img_hover'>
             
@@ -76,20 +78,21 @@ const ProjectCard = ({
         </div>
       {/* </Tilt> */}
       </div>
-    </motion.div>
+      
+ </div>
   );
 };
 
 const Works = () => {
   return (
     <>
-      <motion.div variants={textVariant()}>
+      <div>
         <p className={`${styles.sectionSubText} `}>My work</p>
         <h2 className={`${styles.sectionHeadText}`}>Projects</h2>
-      </motion.div>
+      </div>
 
       <div className='w-full flex'>
-        <motion.p
+        <p
           variants={fadeIn("", "", 0.1, 1)}
           className='mt-3 text-secondary text-[17px] max-w-5xl leading-[30px]'
         >
@@ -98,7 +101,7 @@ const Works = () => {
           links to code repositories and live demos in it. It reflects my
           ability to solve complex problems, work with different technologies,
           and manage projects effectively.
-        </motion.p>
+        </p>
       </div>
 
       <div className='mt-10 flex flex-wrap justify-center gap-7'>
