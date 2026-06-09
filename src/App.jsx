@@ -22,27 +22,55 @@ const CursorTrail = () => {
   const mousePos = useRef({ x: -999, y: -999 });
   const animRef = useRef(null);
   const started = useRef(false);
+  const isHolding = useRef(false);
 
   useEffect(() => {
     const handleMove = (e) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
       if (!started.current) started.current = true;
     };
+    const handleTouch = (e) => {
+      const t = e.touches[0];
+      if (!t) return;
+      mousePos.current = { x: t.clientX, y: t.clientY };
+      if (!started.current) started.current = true;
+    };
+    const handleDown = () => { isHolding.current = true; };
+    const handleUp = () => {
+      isHolding.current = false;
+      trailRef.current = [];
+    };
+    const handleTouchStart = (e) => {
+      isHolding.current = true;
+      const t = e.touches[0];
+      if (t) mousePos.current = { x: t.clientX, y: t.clientY };
+    };
+    const handleTouchEnd = () => {
+      isHolding.current = false;
+      trailRef.current = [];
+    };
+
     window.addEventListener("mousemove", handleMove);
+    window.addEventListener("touchmove", handleTouch, { passive: true });
+    window.addEventListener("mousedown", handleDown);
+    window.addEventListener("mouseup", handleUp);
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd);
 
     const tick = () => {
-      if (started.current) {
+      if (started.current && isHolding.current) {
         const mouse = mousePos.current;
         const trail = trailRef.current;
-
-        // Add new point at cursor
         trail.push({ x: mouse.x, y: mouse.y, age: 0 });
-
-        // Age all points and remove old ones
         trailRef.current = trail
           .map(p => ({ ...p, age: p.age + 1 }))
           .filter(p => p.age < 28);
-
+        forceRender(n => n + 1);
+      } else if (!isHolding.current && trailRef.current.length > 0) {
+        // fade out gradually when released
+        trailRef.current = trailRef.current
+          .map(p => ({ ...p, age: p.age + 2 }))
+          .filter(p => p.age < 28);
         forceRender(n => n + 1);
       }
       animRef.current = requestAnimationFrame(tick);
@@ -51,6 +79,11 @@ const CursorTrail = () => {
 
     return () => {
       window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("touchmove", handleTouch);
+      window.removeEventListener("mousedown", handleDown);
+      window.removeEventListener("mouseup", handleUp);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
       cancelAnimationFrame(animRef.current);
     };
   }, []);
@@ -58,11 +91,10 @@ const CursorTrail = () => {
   const points = trailRef.current;
   if (points.length < 4) return null;
 
-  // Smooth the points using moving average
   const smoothed = points.map((p, i) => {
-    const window = 4;
-    const start = Math.max(0, i - window);
-    const end = Math.min(points.length - 1, i + window);
+    const w = 4;
+    const start = Math.max(0, i - w);
+    const end = Math.min(points.length - 1, i + w);
     let sx = 0, sy = 0, count = 0;
     for (let j = start; j <= end; j++) {
       sx += points[j].x;
@@ -72,13 +104,10 @@ const CursorTrail = () => {
     return { x: sx / count, y: sy / count, age: p.age };
   });
 
-  // Build smooth catmull-rom style path
   const buildPath = (pts) => {
     if (pts.length < 2) return "";
     let d = `M ${pts[0].x} ${pts[0].y}`;
     for (let i = 0; i < pts.length - 2; i++) {
-      const x1 = (pts[i].x + pts[i + 1].x) / 2;
-      const y1 = (pts[i].y + pts[i + 1].y) / 2;
       const x2 = (pts[i + 1].x + pts[i + 2].x) / 2;
       const y2 = (pts[i + 1].y + pts[i + 2].y) / 2;
       d += ` C ${pts[i + 1].x} ${pts[i + 1].y} ${pts[i + 1].x} ${pts[i + 1].y} ${x2} ${y2}`;
@@ -86,9 +115,6 @@ const CursorTrail = () => {
     return d;
   };
 
-  const path = buildPath(smoothed);
-
-  // Build offset path for ribbon width effect
   const buildOffsetPath = (pts, offset) => {
     if (pts.length < 2) return "";
     const offsetPts = pts.map((p, i) => {
@@ -112,23 +138,18 @@ const CursorTrail = () => {
     return d;
   };
 
-  const topPath = buildOffsetPath(smoothed, -10);
-  const bottomPath = buildOffsetPath(smoothed, 10);
-
-  // Reversed bottom path for closing the ribbon shape
-  const bottomReversed = [...smoothed].reverse();
   const buildReversedPath = (pts) => {
     if (pts.length < 2) return "";
-    const offsetPts = pts.map((p, i) => {
-      const prev = pts[Math.max(0, i - 1)];
-      const next = pts[Math.min(pts.length - 1, i + 1)];
+    const reversed = [...pts].reverse();
+    const offsetPts = reversed.map((p, i) => {
+      const prev = reversed[Math.max(0, i - 1)];
+      const next = reversed[Math.min(reversed.length - 1, i + 1)];
       const dx = next.x - prev.x;
       const dy = next.y - prev.y;
       const len = Math.sqrt(dx * dx + dy * dy) || 1;
-      const orig = smoothed[smoothed.length - 1 - i];
       return {
-        x: orig.x - (-dy / len) * 10,
-        y: orig.y - (dx / len) * 10,
+        x: p.x - (-dy / len) * 10,
+        y: p.y - (dx / len) * 10,
       };
     });
     let d = `L ${offsetPts[0].x} ${offsetPts[0].y}`;
@@ -140,9 +161,9 @@ const CursorTrail = () => {
     return d;
   };
 
-  const closingPath = buildReversedPath(bottomReversed);
+  const topPath = buildOffsetPath(smoothed, -10);
+  const closingPath = buildReversedPath(smoothed);
   const ribbonFill = `${topPath} ${closingPath} Z`;
-
   const totalPoints = smoothed.length;
   const gradId = `ribbonGrad_${Math.floor(Date.now() / 100)}`;
 
@@ -154,70 +175,32 @@ const CursorTrail = () => {
       overflow: "visible",
     }}>
       <defs>
-        <linearGradient
-          id={gradId}
-          gradientUnits="userSpaceOnUse"
+        <linearGradient id={gradId} gradientUnits="userSpaceOnUse"
           x1={smoothed[0]?.x} y1={smoothed[0]?.y}
-          x2={smoothed[totalPoints - 1]?.x}
-          y2={smoothed[totalPoints - 1]?.y}
+          x2={smoothed[totalPoints - 1]?.x} y2={smoothed[totalPoints - 1]?.y}
         >
           <stop offset="0%" stopColor="#A8C5A0" stopOpacity="0"/>
-<stop offset="30%" stopColor="#A8C5A0" stopOpacity="0.08"/>
-<stop offset="70%" stopColor="#7A9E7E" stopOpacity="0.18"/>
-<stop offset="100%" stopColor="#7A9E7E" stopOpacity="0.28"/>
+          <stop offset="30%" stopColor="#A8C5A0" stopOpacity="0.08"/>
+          <stop offset="70%" stopColor="#7A9E7E" stopOpacity="0.18"/>
+          <stop offset="100%" stopColor="#7A9E7E" stopOpacity="0.28"/>
         </linearGradient>
-
-        <linearGradient
-          id={`${gradId}_shine`}
-          gradientUnits="userSpaceOnUse"
+        <linearGradient id={`${gradId}_shine`} gradientUnits="userSpaceOnUse"
           x1={smoothed[0]?.x} y1={smoothed[0]?.y}
-          x2={smoothed[totalPoints - 1]?.x}
-          y2={smoothed[totalPoints - 1]?.y}
+          x2={smoothed[totalPoints - 1]?.x} y2={smoothed[totalPoints - 1]?.y}
         >
-       <stop offset="0%" stopColor="#fff" stopOpacity="0"/>
-<stop offset="60%" stopColor="#fff" stopOpacity="0.2"/>
-<stop offset="100%" stopColor="#fff" stopOpacity="0"/>
+          <stop offset="0%" stopColor="#fff" stopOpacity="0"/>
+          <stop offset="60%" stopColor="#fff" stopOpacity="0.2"/>
+          <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
         </linearGradient>
       </defs>
-
-      {/* Ribbon fill — cloth shape */}
-      <path
-        d={ribbonFill}
-        fill={`url(#${gradId})`}
-        stroke="none"
-      />
-
-      {/* Soft edge lines */}
-      <path
-        d={topPath}
-stroke="#7A9E7E"
-        strokeWidth="0.8"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.2"
-      />
-      <path
-        d={buildOffsetPath(smoothed, 10)}
-  stroke="#7A9E7E"
-        strokeWidth="0.8"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.15"
-      />
-
-      {/* Shine line */}
-      <path
-        d={buildOffsetPath(smoothed, -5)}
+      <path d={ribbonFill} fill={`url(#${gradId})`} stroke="none"/>
+      <path d={buildOffsetPath(smoothed, -5)}
         stroke={`url(#${gradId}_shine)`}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.5"
-      />
+        strokeWidth="1.5" strokeLinecap="round"
+        fill="none" opacity="0.5"/>
     </svg>
   );
 };
-
 
 
 const CustomCursor = () => {
