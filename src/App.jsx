@@ -17,48 +17,301 @@ const flapStyle = `
 `;
 
 const CursorTrail = () => {
-  const [dots, setDots] = useState([]);
-  const counter = useRef(0);
+  const trailRef = useRef([]);
+  const [, forceRender] = useState(0);
+  const mousePos = useRef({ x: -999, y: -999 });
+  const animRef = useRef(null);
+  const started = useRef(false);
 
   useEffect(() => {
-    const addDot = (x, y) => {
-      const id = counter.current++;
-      const dot = { id, x, y, color: id % 2 === 0 ? "#E8A598" : "#A8C5A0" };
-      setDots(prev => [...prev.slice(-18), dot]);
-      setTimeout(() => setDots(prev => prev.filter(d => d.id !== id)), 700);
+    const handleMove = (e) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+      if (!started.current) started.current = true;
     };
-
-    const handleMove = (e) => addDot(e.clientX, e.clientY);
-
-    const handleTouch = (e) => {
-      // loop all fingers
-      Array.from(e.touches).forEach(t => addDot(t.clientX, t.clientY));
-    };
-
     window.addEventListener("mousemove", handleMove);
-    window.addEventListener("touchmove", handleTouch, { passive: true });
-    window.addEventListener("touchstart", handleTouch, { passive: true });
+
+    const tick = () => {
+      if (started.current) {
+        const mouse = mousePos.current;
+        const trail = trailRef.current;
+
+        // Add new point at cursor
+        trail.push({ x: mouse.x, y: mouse.y, age: 0 });
+
+        // Age all points and remove old ones
+        trailRef.current = trail
+          .map(p => ({ ...p, age: p.age + 1 }))
+          .filter(p => p.age < 28);
+
+        forceRender(n => n + 1);
+      }
+      animRef.current = requestAnimationFrame(tick);
+    };
+    animRef.current = requestAnimationFrame(tick);
 
     return () => {
       window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("touchmove", handleTouch);
-      window.removeEventListener("touchstart", handleTouch);
+      cancelAnimationFrame(animRef.current);
+    };
+  }, []);
+
+  const points = trailRef.current;
+  if (points.length < 4) return null;
+
+  // Smooth the points using moving average
+  const smoothed = points.map((p, i) => {
+    const window = 4;
+    const start = Math.max(0, i - window);
+    const end = Math.min(points.length - 1, i + window);
+    let sx = 0, sy = 0, count = 0;
+    for (let j = start; j <= end; j++) {
+      sx += points[j].x;
+      sy += points[j].y;
+      count++;
+    }
+    return { x: sx / count, y: sy / count, age: p.age };
+  });
+
+  // Build smooth catmull-rom style path
+  const buildPath = (pts) => {
+    if (pts.length < 2) return "";
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 2; i++) {
+      const x1 = (pts[i].x + pts[i + 1].x) / 2;
+      const y1 = (pts[i].y + pts[i + 1].y) / 2;
+      const x2 = (pts[i + 1].x + pts[i + 2].x) / 2;
+      const y2 = (pts[i + 1].y + pts[i + 2].y) / 2;
+      d += ` C ${pts[i + 1].x} ${pts[i + 1].y} ${pts[i + 1].x} ${pts[i + 1].y} ${x2} ${y2}`;
+    }
+    return d;
+  };
+
+  const path = buildPath(smoothed);
+
+  // Build offset path for ribbon width effect
+  const buildOffsetPath = (pts, offset) => {
+    if (pts.length < 2) return "";
+    const offsetPts = pts.map((p, i) => {
+      const prev = pts[Math.max(0, i - 1)];
+      const next = pts[Math.min(pts.length - 1, i + 1)];
+      const dx = next.x - prev.x;
+      const dy = next.y - prev.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      return {
+        x: p.x + (-dy / len) * offset,
+        y: p.y + (dx / len) * offset,
+        age: p.age,
+      };
+    });
+    let d = `M ${offsetPts[0].x} ${offsetPts[0].y}`;
+    for (let i = 0; i < offsetPts.length - 2; i++) {
+      const x2 = (offsetPts[i + 1].x + offsetPts[i + 2].x) / 2;
+      const y2 = (offsetPts[i + 1].y + offsetPts[i + 2].y) / 2;
+      d += ` C ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${x2} ${y2}`;
+    }
+    return d;
+  };
+
+  const topPath = buildOffsetPath(smoothed, -10);
+  const bottomPath = buildOffsetPath(smoothed, 10);
+
+  // Reversed bottom path for closing the ribbon shape
+  const bottomReversed = [...smoothed].reverse();
+  const buildReversedPath = (pts) => {
+    if (pts.length < 2) return "";
+    const offsetPts = pts.map((p, i) => {
+      const prev = pts[Math.max(0, i - 1)];
+      const next = pts[Math.min(pts.length - 1, i + 1)];
+      const dx = next.x - prev.x;
+      const dy = next.y - prev.y;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const orig = smoothed[smoothed.length - 1 - i];
+      return {
+        x: orig.x - (-dy / len) * 10,
+        y: orig.y - (dx / len) * 10,
+      };
+    });
+    let d = `L ${offsetPts[0].x} ${offsetPts[0].y}`;
+    for (let i = 0; i < offsetPts.length - 2; i++) {
+      const x2 = (offsetPts[i + 1].x + offsetPts[i + 2].x) / 2;
+      const y2 = (offsetPts[i + 1].y + offsetPts[i + 2].y) / 2;
+      d += ` C ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${x2} ${y2}`;
+    }
+    return d;
+  };
+
+  const closingPath = buildReversedPath(bottomReversed);
+  const ribbonFill = `${topPath} ${closingPath} Z`;
+
+  const totalPoints = smoothed.length;
+  const gradId = `ribbonGrad_${Math.floor(Date.now() / 100)}`;
+
+  return (
+    <svg style={{
+      position: "fixed", top: 0, left: 0,
+      width: "100vw", height: "100vh",
+      pointerEvents: "none", zIndex: 9999,
+      overflow: "visible",
+    }}>
+      <defs>
+        <linearGradient
+          id={gradId}
+          gradientUnits="userSpaceOnUse"
+          x1={smoothed[0]?.x} y1={smoothed[0]?.y}
+          x2={smoothed[totalPoints - 1]?.x}
+          y2={smoothed[totalPoints - 1]?.y}
+        >
+          <stop offset="0%" stopColor="#A8C5A0" stopOpacity="0"/>
+<stop offset="30%" stopColor="#A8C5A0" stopOpacity="0.08"/>
+<stop offset="70%" stopColor="#7A9E7E" stopOpacity="0.18"/>
+<stop offset="100%" stopColor="#7A9E7E" stopOpacity="0.28"/>
+        </linearGradient>
+
+        <linearGradient
+          id={`${gradId}_shine`}
+          gradientUnits="userSpaceOnUse"
+          x1={smoothed[0]?.x} y1={smoothed[0]?.y}
+          x2={smoothed[totalPoints - 1]?.x}
+          y2={smoothed[totalPoints - 1]?.y}
+        >
+       <stop offset="0%" stopColor="#fff" stopOpacity="0"/>
+<stop offset="60%" stopColor="#fff" stopOpacity="0.2"/>
+<stop offset="100%" stopColor="#fff" stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+
+      {/* Ribbon fill — cloth shape */}
+      <path
+        d={ribbonFill}
+        fill={`url(#${gradId})`}
+        stroke="none"
+      />
+
+      {/* Soft edge lines */}
+      <path
+        d={topPath}
+stroke="#7A9E7E"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.2"
+      />
+      <path
+        d={buildOffsetPath(smoothed, 10)}
+  stroke="#7A9E7E"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.15"
+      />
+
+      {/* Shine line */}
+      <path
+        d={buildOffsetPath(smoothed, -5)}
+        stroke={`url(#${gradId}_shine)`}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.5"
+      />
+    </svg>
+  );
+};
+
+
+
+const CustomCursor = () => {
+  const [pos, setPos] = useState({ x: -100, y: -100 });
+  const [clicking, setClicking] = useState(false);
+
+  useEffect(() => {
+    const handleMove = (e) => setPos({ x: e.clientX, y: e.clientY });
+    const handleDown = () => setClicking(true);
+    const handleUp = () => setClicking(false);
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mousedown", handleDown);
+    window.addEventListener("mouseup", handleUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mousedown", handleDown);
+      window.removeEventListener("mouseup", handleUp);
     };
   }, []);
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 9999 }}>
-      {dots.map((dot) => (
-        <motion.div key={dot.id}
-          initial={{ opacity: 0.6, scale: 1 }}
-          animate={{ opacity: 0, scale: 0.2 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          style={{ position: "fixed", left: dot.x - 4, top: dot.y - 4, width: 8, height: 8, borderRadius: "50%", background: dot.color, pointerEvents: "none" }}
+    <motion.div
+      animate={{
+        x: pos.x - 16,
+        y: pos.y - 16,
+        scale: clicking ? 0.8 : 1,
+        rotate: clicking ? -20 : 0,
+      }}
+      transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
+      style={{
+        position: "fixed",
+        top: 0, left: 0,
+        pointerEvents: "none",
+        zIndex: 99999,
+      }}
+    >
+   <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+        {/* Left upper wing */}
+        <motion.ellipse
+          cx="14" cy="15" rx="11" ry="7"
+          fill="#7A9E7E" opacity="0.85"
+          transform="rotate(-25 14 15)"
+          animate={{ scaleX: [1, 0.35, 1] }}
+          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformOrigin: "20px 21px" }}
         />
-      ))}
-    </div>
+        {/* Left lower wing */}
+        <motion.ellipse
+          cx="13" cy="27" rx="8" ry="5"
+          fill="#A8C5A0" opacity="0.75"
+          transform="rotate(15 13 27)"
+          animate={{ scaleX: [1, 0.35, 1] }}
+          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
+          style={{ transformOrigin: "20px 21px" }}
+        />
+        {/* Right upper wing */}
+        <motion.ellipse
+          cx="26" cy="15" rx="11" ry="7"
+          fill="#7A9E7E" opacity="0.85"
+          transform="rotate(25 26 15)"
+          animate={{ scaleX: [1, 0.35, 1] }}
+          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformOrigin: "20px 21px" }}
+        />
+        {/* Right lower wing */}
+        <motion.ellipse
+          cx="27" cy="27" rx="8" ry="5"
+          fill="#A8C5A0" opacity="0.75"
+          transform="rotate(-15 27 27)"
+          animate={{ scaleX: [1, 0.35, 1] }}
+          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
+          style={{ transformOrigin: "20px 21px" }}
+        />
+        {/* Shine on wings */}
+        <ellipse cx="14" cy="13" rx="4" ry="2.5"
+          fill="#fff" opacity="0.3"
+          transform="rotate(-25 14 13)"/>
+        <ellipse cx="26" cy="13" rx="4" ry="2.5"
+          fill="#fff" opacity="0.3"
+          transform="rotate(25 26 13)"/>
+        {/* Body */}
+        <ellipse cx="20" cy="21" rx="1.8" ry="7.5" fill="#4A7A50" opacity="0.7"/>
+        {/* Antennae */}
+        <path d="M19 14 Q17 9 15 7" stroke="#4A7A50" strokeWidth="0.9"
+          strokeLinecap="round" opacity="0.6"/>
+        <path d="M21 14 Q23 9 25 7" stroke="#4A7A50" strokeWidth="0.9"
+          strokeLinecap="round" opacity="0.6"/>
+        <circle cx="15" cy="6.5" r="1.3" fill="#7A9E7E"/>
+        <circle cx="25" cy="6.5" r="1.3" fill="#7A9E7E"/>
+      </svg>
+    </motion.div>
   );
 };
+
 
 // Ribbon intro
 const RibbonIntro = ({ onComplete }) => (
@@ -458,7 +711,8 @@ const App = () => {
       <AnimatePresence>
         {showMini && <MiniLanding onEnter={handleEnterFull} />}
       </AnimatePresence>
-      <CursorTrail />
+<CursorTrail />
+<CustomCursor />
       <Butterflies />
       {showFull && (
         <motion.div

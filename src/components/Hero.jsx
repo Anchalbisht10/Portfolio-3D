@@ -313,24 +313,81 @@ const Hero = () => {
         </motion.div>
       </div>
 
-      {/* Scroll arrow */}
-      <div style={{
-        position: "absolute", bottom: "32px",
-        left: "50%", transform: "translateX(-50%)",
-      }}>
-        <a href="#about" style={{ textDecoration: "none" }}>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity }}
-            style={{
-              width: "22px", height: "22px",
-              border: "2px solid #E8A598",
-              borderTop: "none", borderLeft: "none",
-              transform: "rotate(45deg)",
-            }}
-          />
-        </a>
-      </div>
+    {/* Scroll — butterfly arrow */}
+<div style={{
+  position: "absolute", bottom: "32px",
+  left: "50%", transform: "translateX(-50%)",
+  zIndex: 10,
+}}>
+  <a href="#about" style={{ textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+    
+    <motion.p
+      animate={{ opacity: [0.4, 1, 0.4] }}
+      transition={{ duration: 2, repeat: Infinity }}
+      style={{
+        fontSize: "10px", color: "#E8A598",
+        fontFamily: "sans-serif", letterSpacing: "0.15em",
+        textTransform: "uppercase", margin: 0,
+      }}
+    >
+      scroll
+    </motion.p>
+
+    <motion.div
+      animate={{ y: [0, 10, 0] }}
+      transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+        {/* Left upper wing */}
+        <motion.ellipse
+          cx="14" cy="15" rx="11" ry="7"
+          fill="#E8A598" opacity="0.7"
+          transform="rotate(-25 14 15)"
+          animate={{ scaleX: [1, 0.4, 1] }}
+          transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformOrigin: "20px 22px" }}
+        />
+        {/* Left lower wing */}
+        <motion.ellipse
+          cx="13" cy="27" rx="8" ry="5"
+          fill="#F2B8AD" opacity="0.6"
+          transform="rotate(15 13 27)"
+          animate={{ scaleX: [1, 0.4, 1] }}
+          transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
+          style={{ transformOrigin: "20px 22px" }}
+        />
+        {/* Right upper wing */}
+        <motion.ellipse
+          cx="26" cy="15" rx="11" ry="7"
+          fill="#E8A598" opacity="0.7"
+          transform="rotate(25 26 15)"
+          animate={{ scaleX: [1, 0.4, 1] }}
+          transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformOrigin: "20px 22px" }}
+        />
+        {/* Right lower wing */}
+        <motion.ellipse
+          cx="27" cy="27" rx="8" ry="5"
+          fill="#F2B8AD" opacity="0.6"
+          transform="rotate(-15 27 27)"
+          animate={{ scaleX: [1, 0.4, 1] }}
+          transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
+          style={{ transformOrigin: "20px 22px" }}
+        />
+        {/* Body */}
+        <ellipse cx="20" cy="21" rx="1.5" ry="7" fill="#C4817A" opacity="0.6"/>
+        {/* Antennae */}
+        <path d="M19 14 Q17 9 15 7" stroke="#C4817A" strokeWidth="0.8" strokeLinecap="round" opacity="0.5"/>
+        <path d="M21 14 Q23 9 25 7" stroke="#C4817A" strokeWidth="0.8" strokeLinecap="round" opacity="0.5"/>
+        <circle cx="15" cy="7" r="1" fill="#C4817A" opacity="0.5"/>
+        <circle cx="25" cy="7" r="1" fill="#C4817A" opacity="0.5"/>
+        {/* Small arrow below body */}
+        <path d="M17 33 L20 37 L23 33" stroke="#E8A598" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+      </svg>
+    </motion.div>
+
+  </a>
+</div>
     </section>
   );
 };
