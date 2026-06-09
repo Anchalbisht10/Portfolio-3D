@@ -112,26 +112,35 @@ const Hero = () => {
             Youth Advocate · Social Impact Technologist · Founder of Chianya
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.7 }}
-            style={{ marginBottom: "32px" }}>
-            <p style={{ fontSize: "16px", color: "#4A4A4A", lineHeight: 1.85, marginBottom: "16px" }}>
-              I finished my B.Tech and instead of updating my resume with frameworks,
-              I asked myself one question:
-            </p>
-            <p style={{
-              fontSize: "18px", color: "#1A1A1A",
-              fontStyle: "italic", lineHeight: 1.6,
-              borderLeft: "3px solid #E8A598",
-              paddingLeft: "20px", marginBottom: "16px",
-            }}>
-              "What actually needs to be built?"
-            </p>
-            <p style={{ fontSize: "16px", color: "#4A4A4A", lineHeight: 1.85 }}>
-              The answer was not another app. It was a forest.
-            </p>
-          </motion.div>
+  <motion.div
+  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.55, duration: 0.7 }}
+  style={{
+    marginBottom: "32px",
+    background: "rgba(255,255,255,0.7)",
+    border: "1px solid rgba(232,165,152,0.25)",
+    borderRadius: "16px",
+    padding: "24px 28px",
+    boxShadow: "0 4px 20px rgba(232,165,152,0.08)",
+    backdropFilter: "blur(4px)",
+  }}>
+  <p style={{ fontSize: "16px", color: "#4A4A4A", lineHeight: 1.85, marginBottom: "16px" }}>
+    I finished my B.Tech and instead of updating my resume with frameworks,
+    I asked myself one question:
+  </p>
+  <p style={{
+    fontSize: "18px", color: "#1A1A1A",
+    fontStyle: "italic", lineHeight: 1.6,
+    borderLeft: "3px solid #E8A598",
+    paddingLeft: "20px", marginBottom: "16px",
+    margin: "0 0 16px 0",
+  }}>
+    "What actually needs to be built?"
+  </p>
+  <p style={{ fontSize: "16px", color: "#4A4A4A", lineHeight: 1.85, margin: 0 }}>
+    The answer was not another app. It was a forest.
+  </p>
+</motion.div>
 
           {/* SDG badges */}
           <motion.div
