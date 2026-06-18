@@ -232,7 +232,7 @@ const Contact = () => {
             display: "flex", flexWrap: "wrap", gap: "8px",
             marginBottom: "24px",
           }}>
-            {["UNESCO", "UNICEF", "UN Women", "WHO", "Erasmus 2027", "Chevening 2026"].map((tag) => (
+         {["UNESCO", "UNICEF", "UN Women", "WHO", "Erasmus 2027", "Türkiye Bursları 2027", "Stipendium Hungaricum 2027"].map((tag) => (
               <span key={tag} style={{
                 fontSize: "11px", padding: "4px 12px",
                 borderRadius: "20px",

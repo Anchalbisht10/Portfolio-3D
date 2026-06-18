@@ -16,8 +16,8 @@ const Hero = () => {
       <style>{`
    @media (max-width: 768px) {
           .hero-layout { flex-direction: column !important; gap: 16px !important; padding: 90px 24px 60px !important; align-items: center !important; }
-          .hero-photo-col { display: flex !important; width: 200px !important; margin: 0 auto !important; transform: none !important; }
-          .hero-photo-col > div { width: 200px !important; height: 240px !important; }
+       .hero-photo-col { display: flex !important; width: 200px !important; margin: 0 auto !important; transform: none !important; overflow: visible !important; }
+.hero-photo-col > div { width: 200px !important; height: 240px !important; overflow: hidden !important; }
           .hero-text-col { max-width: 100% !important; }
           .hero-cta-row { flex-direction: column !important; gap: 10px !important; }
           .hero-cta-row a { text-align: center !important; }

@@ -16,284 +16,10 @@ const flapStyle = `
   }
 `;
 
-const CursorTrail = () => {
-  const trailRef = useRef([]);
-  const [, forceRender] = useState(0);
-  const mousePos = useRef({ x: -999, y: -999 });
-  const animRef = useRef(null);
-  const started = useRef(false);
-  const isHolding = useRef(false);
-
-  useEffect(() => {
-    const handleMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-      if (!started.current) started.current = true;
-    };
-    const handleTouch = (e) => {
-      const t = e.touches[0];
-      if (!t) return;
-      mousePos.current = { x: t.clientX, y: t.clientY };
-      if (!started.current) started.current = true;
-    };
-    const handleDown = () => { isHolding.current = true; };
-    const handleUp = () => {
-      isHolding.current = false;
-      trailRef.current = [];
-    };
-    const handleTouchStart = (e) => {
-      isHolding.current = true;
-      const t = e.touches[0];
-      if (t) mousePos.current = { x: t.clientX, y: t.clientY };
-    };
-    const handleTouchEnd = () => {
-      isHolding.current = false;
-      trailRef.current = [];
-    };
-
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("touchmove", handleTouch, { passive: true });
-    window.addEventListener("mousedown", handleDown);
-    window.addEventListener("mouseup", handleUp);
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd);
-
-    const tick = () => {
-      if (started.current && isHolding.current) {
-        const mouse = mousePos.current;
-        const trail = trailRef.current;
-        trail.push({ x: mouse.x, y: mouse.y, age: 0 });
-        trailRef.current = trail
-          .map(p => ({ ...p, age: p.age + 1 }))
-          .filter(p => p.age < 28);
-        forceRender(n => n + 1);
-      } else if (!isHolding.current && trailRef.current.length > 0) {
-        // fade out gradually when released
-        trailRef.current = trailRef.current
-          .map(p => ({ ...p, age: p.age + 2 }))
-          .filter(p => p.age < 28);
-        forceRender(n => n + 1);
-      }
-      animRef.current = requestAnimationFrame(tick);
-    };
-    animRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("touchmove", handleTouch);
-      window.removeEventListener("mousedown", handleDown);
-      window.removeEventListener("mouseup", handleUp);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchend", handleTouchEnd);
-      cancelAnimationFrame(animRef.current);
-    };
-  }, []);
-
-  const points = trailRef.current;
-  if (points.length < 4) return null;
-
-  const smoothed = points.map((p, i) => {
-    const w = 4;
-    const start = Math.max(0, i - w);
-    const end = Math.min(points.length - 1, i + w);
-    let sx = 0, sy = 0, count = 0;
-    for (let j = start; j <= end; j++) {
-      sx += points[j].x;
-      sy += points[j].y;
-      count++;
-    }
-    return { x: sx / count, y: sy / count, age: p.age };
-  });
-
-  const buildPath = (pts) => {
-    if (pts.length < 2) return "";
-    let d = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 0; i < pts.length - 2; i++) {
-      const x2 = (pts[i + 1].x + pts[i + 2].x) / 2;
-      const y2 = (pts[i + 1].y + pts[i + 2].y) / 2;
-      d += ` C ${pts[i + 1].x} ${pts[i + 1].y} ${pts[i + 1].x} ${pts[i + 1].y} ${x2} ${y2}`;
-    }
-    return d;
-  };
-
-  const buildOffsetPath = (pts, offset) => {
-    if (pts.length < 2) return "";
-    const offsetPts = pts.map((p, i) => {
-      const prev = pts[Math.max(0, i - 1)];
-      const next = pts[Math.min(pts.length - 1, i + 1)];
-      const dx = next.x - prev.x;
-      const dy = next.y - prev.y;
-      const len = Math.sqrt(dx * dx + dy * dy) || 1;
-      return {
-        x: p.x + (-dy / len) * offset,
-        y: p.y + (dx / len) * offset,
-        age: p.age,
-      };
-    });
-    let d = `M ${offsetPts[0].x} ${offsetPts[0].y}`;
-    for (let i = 0; i < offsetPts.length - 2; i++) {
-      const x2 = (offsetPts[i + 1].x + offsetPts[i + 2].x) / 2;
-      const y2 = (offsetPts[i + 1].y + offsetPts[i + 2].y) / 2;
-      d += ` C ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${x2} ${y2}`;
-    }
-    return d;
-  };
-
-  const buildReversedPath = (pts) => {
-    if (pts.length < 2) return "";
-    const reversed = [...pts].reverse();
-    const offsetPts = reversed.map((p, i) => {
-      const prev = reversed[Math.max(0, i - 1)];
-      const next = reversed[Math.min(reversed.length - 1, i + 1)];
-      const dx = next.x - prev.x;
-      const dy = next.y - prev.y;
-      const len = Math.sqrt(dx * dx + dy * dy) || 1;
-      return {
-        x: p.x - (-dy / len) * 10,
-        y: p.y - (dx / len) * 10,
-      };
-    });
-    let d = `L ${offsetPts[0].x} ${offsetPts[0].y}`;
-    for (let i = 0; i < offsetPts.length - 2; i++) {
-      const x2 = (offsetPts[i + 1].x + offsetPts[i + 2].x) / 2;
-      const y2 = (offsetPts[i + 1].y + offsetPts[i + 2].y) / 2;
-      d += ` C ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${offsetPts[i + 1].x} ${offsetPts[i + 1].y} ${x2} ${y2}`;
-    }
-    return d;
-  };
-
-  const topPath = buildOffsetPath(smoothed, -10);
-  const closingPath = buildReversedPath(smoothed);
-  const ribbonFill = `${topPath} ${closingPath} Z`;
-  const totalPoints = smoothed.length;
-  const gradId = `ribbonGrad_${Math.floor(Date.now() / 100)}`;
-
-  return (
-    <svg style={{
-      position: "fixed", top: 0, left: 0,
-      width: "100vw", height: "100vh",
-      pointerEvents: "none", zIndex: 9999,
-      overflow: "visible",
-    }}>
-      <defs>
-        <linearGradient id={gradId} gradientUnits="userSpaceOnUse"
-          x1={smoothed[0]?.x} y1={smoothed[0]?.y}
-          x2={smoothed[totalPoints - 1]?.x} y2={smoothed[totalPoints - 1]?.y}
-        >
-          <stop offset="0%" stopColor="#A8C5A0" stopOpacity="0"/>
-          <stop offset="30%" stopColor="#A8C5A0" stopOpacity="0.08"/>
-          <stop offset="70%" stopColor="#7A9E7E" stopOpacity="0.18"/>
-          <stop offset="100%" stopColor="#7A9E7E" stopOpacity="0.28"/>
-        </linearGradient>
-        <linearGradient id={`${gradId}_shine`} gradientUnits="userSpaceOnUse"
-          x1={smoothed[0]?.x} y1={smoothed[0]?.y}
-          x2={smoothed[totalPoints - 1]?.x} y2={smoothed[totalPoints - 1]?.y}
-        >
-          <stop offset="0%" stopColor="#fff" stopOpacity="0"/>
-          <stop offset="60%" stopColor="#fff" stopOpacity="0.2"/>
-          <stop offset="100%" stopColor="#fff" stopOpacity="0"/>
-        </linearGradient>
-      </defs>
-      <path d={ribbonFill} fill={`url(#${gradId})`} stroke="none"/>
-      <path d={buildOffsetPath(smoothed, -5)}
-        stroke={`url(#${gradId}_shine)`}
-        strokeWidth="1.5" strokeLinecap="round"
-        fill="none" opacity="0.5"/>
-    </svg>
-  );
-};
 
 
-const CustomCursor = () => {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [clicking, setClicking] = useState(false);
 
-  useEffect(() => {
-    const handleMove = (e) => setPos({ x: e.clientX, y: e.clientY });
-    const handleDown = () => setClicking(true);
-    const handleUp = () => setClicking(false);
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("mousedown", handleDown);
-    window.addEventListener("mouseup", handleUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("mousedown", handleDown);
-      window.removeEventListener("mouseup", handleUp);
-    };
-  }, []);
 
-  return (
-    <motion.div
-      animate={{
-        x: pos.x - 16,
-        y: pos.y - 16,
-        scale: clicking ? 0.8 : 1,
-        rotate: clicking ? -20 : 0,
-      }}
-      transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.5 }}
-      style={{
-        position: "fixed",
-        top: 0, left: 0,
-        pointerEvents: "none",
-        zIndex: 99999,
-      }}
-    >
-   <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-        {/* Left upper wing */}
-        <motion.ellipse
-          cx="14" cy="15" rx="11" ry="7"
-          fill="#7A9E7E" opacity="0.85"
-          transform="rotate(-25 14 15)"
-          animate={{ scaleX: [1, 0.35, 1] }}
-          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "20px 21px" }}
-        />
-        {/* Left lower wing */}
-        <motion.ellipse
-          cx="13" cy="27" rx="8" ry="5"
-          fill="#A8C5A0" opacity="0.75"
-          transform="rotate(15 13 27)"
-          animate={{ scaleX: [1, 0.35, 1] }}
-          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
-          style={{ transformOrigin: "20px 21px" }}
-        />
-        {/* Right upper wing */}
-        <motion.ellipse
-          cx="26" cy="15" rx="11" ry="7"
-          fill="#7A9E7E" opacity="0.85"
-          transform="rotate(25 26 15)"
-          animate={{ scaleX: [1, 0.35, 1] }}
-          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "20px 21px" }}
-        />
-        {/* Right lower wing */}
-        <motion.ellipse
-          cx="27" cy="27" rx="8" ry="5"
-          fill="#A8C5A0" opacity="0.75"
-          transform="rotate(-15 27 27)"
-          animate={{ scaleX: [1, 0.35, 1] }}
-          transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
-          style={{ transformOrigin: "20px 21px" }}
-        />
-        {/* Shine on wings */}
-        <ellipse cx="14" cy="13" rx="4" ry="2.5"
-          fill="#fff" opacity="0.3"
-          transform="rotate(-25 14 13)"/>
-        <ellipse cx="26" cy="13" rx="4" ry="2.5"
-          fill="#fff" opacity="0.3"
-          transform="rotate(25 26 13)"/>
-        {/* Body */}
-        <ellipse cx="20" cy="21" rx="1.8" ry="7.5" fill="#4A7A50" opacity="0.7"/>
-        {/* Antennae */}
-        <path d="M19 14 Q17 9 15 7" stroke="#4A7A50" strokeWidth="0.9"
-          strokeLinecap="round" opacity="0.6"/>
-        <path d="M21 14 Q23 9 25 7" stroke="#4A7A50" strokeWidth="0.9"
-          strokeLinecap="round" opacity="0.6"/>
-        <circle cx="15" cy="6.5" r="1.3" fill="#7A9E7E"/>
-        <circle cx="25" cy="6.5" r="1.3" fill="#7A9E7E"/>
-      </svg>
-    </motion.div>
-  );
-};
 
 
 // Ribbon intro
@@ -531,13 +257,14 @@ const MiniLanding = ({ onEnter }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.5 }}
-      style={{
-        position: "fixed", inset: 0, background: "#FAF7F2",
-        zIndex: 9000, overflowY: "auto",
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "40px 16px", fontFamily: "'Georgia', serif",
-      }}
+     style={{
+  position: "fixed", inset: 0, background: "#FAF7F2",
+  zIndex: 9000, overflowY: "auto",
+  display: "flex", flexDirection: "column",
+  alignItems: "center", justifyContent: "center",
+ padding: "80px 16px 40px", fontFamily: "'Georgia', serif",
+  boxSizing: "border-box", overflowX: "hidden",
+}}
     >
       {/* Background flapping butterflies */}
       {bgButterflies.map((b, i) => (
@@ -554,14 +281,14 @@ const MiniLanding = ({ onEnter }) => {
         initial={{ opacity: 0, scale: 0.85, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.8, type: "spring", bounce: 0.35 }}
-        style={{ position: "relative", width: "180px", marginBottom: "28px", zIndex: 2 }}
+   style={{ position: "relative", width: "180px", marginBottom: "28px", zIndex: 2, marginTop: "40px", paddingTop: "30px" }}
       >
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           style={{ position: "absolute", top: "-16px", left: "-16px", right: "-16px", bottom: "-16px", borderRadius: "50%", border: "1.5px dashed rgba(232,165,152,0.4)", pointerEvents: "none" }}/>
-        <div style={{ width: "180px", height: "210px", borderRadius: "50% 50% 50% 50% / 45% 45% 55% 55%", overflow: "hidden", border: "3px solid rgba(232,165,152,0.5)", boxShadow: "0 12px 40px rgba(232,165,152,0.3)" }}>
+      <div style={{ width: "160px", height: "190px",borderRadius: "50% 50% 50% 50% / 45% 45% 55% 55%", overflow: "hidden", border: "3px solid rgba(232,165,152,0.5)", boxShadow: "0 12px 40px rgba(232,165,152,0.3)" }}>
           <img src="/logo.png" alt="Anchal" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>
         </div>
-        <svg width="90" height="54" viewBox="0 0 120 70" style={{ position: "absolute", top: "-22px", left: "50%", transform: "translateX(-50%)", zIndex: 3 }}>
+          <svg width="90" height="54" viewBox="0 0 120 70" style={{ position: "absolute", top: "-28px", left: "50%", transform: "translateX(-50%)", zIndex: 3 }}>
           <path d="M60 35 C45 20 15 10 10 25 C5 38 30 45 60 35Z" fill="#F2B8AD" opacity="0.9"/>
           <path d="M60 35 C75 20 105 10 110 25 C115 38 90 45 60 35Z" fill="#F2B8AD" opacity="0.9"/>
           <path d="M60 35 C50 42 35 55 28 65 C32 65 42 55 60 38Z" fill="#F2B8AD" opacity="0.8"/>
@@ -594,11 +321,12 @@ const MiniLanding = ({ onEnter }) => {
 
       {/* Pandas grid — truly one-by-one via visibleCount */}
       <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "4px 16px",
-        marginBottom: "36px",
-        zIndex: 2, width: "100%", maxWidth: "400px",
+       display: "grid",
+gridTemplateColumns: "repeat(3, 1fr)",
+gap: "4px 8px",
+width: "100%",
+maxWidth: "340px",
+      
       }}>
         {sections.map((sec, i) => {
           const isVisible = i < visibleCount;
@@ -694,8 +422,6 @@ const App = () => {
       <AnimatePresence>
         {showMini && <MiniLanding onEnter={handleEnterFull} />}
       </AnimatePresence>
-<CursorTrail />
-<CustomCursor />
       <Butterflies />
       {showFull && (
         <motion.div
