@@ -53,19 +53,19 @@ const RibbonIntro = ({ onComplete }) => (
       </svg>
     </motion.div>
     {/* Butterflies — fewer, faster */}
-  {[
-      { x: "8%",  y: "20%", size: 32, color: "#E8A598", delay: 0.1, dur: 8  },
-      { x: "80%", y: "25%", size: 28, color: "#E8A598", delay: 0.2, dur: 9  },
-      { x: "50%", y: "15%", size: 26, color: "#E8A598", delay: 0.1, dur: 9  },
-      { x: "65%", y: "70%", size: 28, color: "#E8A598", delay: 0.3, dur: 8  },
-      { x: "18%", y: "65%", size: 24, color: "#D4907E", delay: 0.2, dur: 10 },
-      { x: "35%", y: "40%", size: 26, color: "#E8A598", delay: 0.15, dur: 7 },
-      { x: "72%", y: "50%", size: 22, color: "#D4907E", delay: 0.25, dur: 9 },
-      { x: "25%", y: "30%", size: 28, color: "#E8A598", delay: 0.05, dur: 8 },
-      { x: "88%", y: "60%", size: 24, color: "#D4907E", delay: 0.35, dur: 10},
-      { x: "55%", y: "75%", size: 26, color: "#E8A598", delay: 0.2,  dur: 7 },
-      { x: "10%", y: "50%", size: 22, color: "#D4907E", delay: 0.4,  dur: 9 },
-      { x: "42%", y: "85%", size: 24, color: "#E8A598", delay: 0.1,  dur: 8 },
+{[
+      { x: "8%",  y: "20%", size: 32, color: "#F2CEC6", delay: 0.1, dur: 8  },
+      { x: "80%", y: "25%", size: 28, color: "#F2CEC6", delay: 0.2, dur: 9  },
+      { x: "50%", y: "15%", size: 26, color: "#F2CEC6", delay: 0.1, dur: 9  },
+      { x: "65%", y: "70%", size: 28, color: "#F2CEC6", delay: 0.3, dur: 8  },
+      { x: "18%", y: "65%", size: 24, color: "#EBBCB0", delay: 0.2, dur: 10 },
+      { x: "35%", y: "40%", size: 26, color: "#F2CEC6", delay: 0.15, dur: 7 },
+      { x: "72%", y: "50%", size: 22, color: "#EBBCB0", delay: 0.25, dur: 9 },
+      { x: "25%", y: "30%", size: 28, color: "#F2CEC6", delay: 0.05, dur: 8 },
+      { x: "88%", y: "60%", size: 24, color: "#EBBCB0", delay: 0.35, dur: 10},
+      { x: "55%", y: "75%", size: 26, color: "#F2CEC6", delay: 0.2,  dur: 7 },
+      { x: "10%", y: "50%", size: 22, color: "#EBBCB0", delay: 0.4,  dur: 9 },
+      { x: "42%", y: "85%", size: 24, color: "#F2CEC6", delay: 0.1,  dur: 8 },
     ].map((b, i) => (
       <motion.div key={i} initial={{ opacity: 0 }}
         animate={{ x: [0, 30, -20, 40, 0], y: [0, -40, 20, -30, 0], opacity: [0, 0.6, 0.4, 0.6, 0] }}
@@ -148,16 +148,16 @@ const FlapButterfly = ({ color, size, delay = 0 }) => (
     <style>{flapStyle}</style>
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none">
       <ellipse className="wing" cx="14" cy="16" rx="12" ry="8"
-        fill={color} opacity="0.6" transform="rotate(-20 14 16)"
+        fill={color} opacity="0.5" transform="rotate(-20 14 16)"
         style={{ animationDelay: `${delay}s` }}/>
       <ellipse className="wing" cx="14" cy="26" rx="9" ry="6"
-        fill={color} opacity="0.5" transform="rotate(20 14 26)"
+        fill={color} opacity="0.4" transform="rotate(20 14 26)"
         style={{ animationDelay: `${delay + 0.05}s` }}/>
       <ellipse className="wing" cx="26" cy="16" rx="12" ry="8"
-        fill={color} opacity="0.6" transform="rotate(20 26 16)"
+        fill={color} opacity="0.5" transform="rotate(20 26 16)"
         style={{ animationDelay: `${delay}s` }}/>
       <ellipse className="wing" cx="26" cy="26" rx="9" ry="6"
-        fill={color} opacity="0.5" transform="rotate(-20 26 26)"
+        fill={color} opacity="0.4" transform="rotate(-20 26 26)"
         style={{ animationDelay: `${delay + 0.05}s` }}/>
       <ellipse cx="20" cy="20" rx="1.5" ry="7" fill="#2C2C2C" opacity="0.4"/>
     </svg>
@@ -166,8 +166,8 @@ const FlapButterfly = ({ color, size, delay = 0 }) => (
 // ── Burst of flapping butterflies on panda click ──────────────────────────────
 const ButterflyBurst = ({ active }) => {
   if (!active) return null;
-  const colors = ["#E8A598","#D4907E","#F2B8AD","#E8A598","#D4907E",
-                  "#F2B8AD","#E8A598","#D4907E","#F2B8AD","#E8A598"];
+const colors = ["#F2CEC6","#EBBCB0","#F2CEC6","#EBBCB0","#F2CEC6",
+                  "#EBBCB0","#F2CEC6","#EBBCB0","#F2CEC6","#EBBCB0"];
   return (
     <>
       {[...Array(10)].map((_, i) => {
@@ -228,27 +228,27 @@ const MiniLanding = ({ onEnter }) => {
     }, 650);
   };
 
-  const bgButterflies = [
-    { x: "5%",  y: "8%",  size: 28, color: "#E8A598", delay: 0,   dur: 7  },
-    { x: "90%", y: "12%", size: 24, color: "#D4907E", delay: 0.8, dur: 9  },
-    { x: "15%", y: "78%", size: 26, color: "#E8A598", delay: 0.4, dur: 8  },
-    { x: "82%", y: "72%", size: 22, color: "#D4907E", delay: 1.2, dur: 10 },
-    { x: "48%", y: "4%",  size: 20, color: "#E8A598", delay: 0.6, dur: 6  },
-    { x: "6%",  y: "45%", size: 18, color: "#D4907E", delay: 1.8, dur: 9  },
-    { x: "93%", y: "48%", size: 20, color: "#E8A598", delay: 0.2, dur: 8  },
-    { x: "30%", y: "88%", size: 22, color: "#D4907E", delay: 1.4, dur: 7  },
-    { x: "70%", y: "90%", size: 18, color: "#E8A598", delay: 0.9, dur: 9  },
-    { x: "22%", y: "18%", size: 16, color: "#D4907E", delay: 2.1, dur: 8  },
-    { x: "75%", y: "22%", size: 20, color: "#E8A598", delay: 0.5, dur: 7  },
-    { x: "55%", y: "92%", size: 16, color: "#D4907E", delay: 1.6, dur: 10 },
-    { x: "38%", y: "35%", size: 22, color: "#E8A598", delay: 1.1, dur: 8  },
-    { x: "62%", y: "55%", size: 18, color: "#D4907E", delay: 2.4, dur: 9  },
-    { x: "12%", y: "32%", size: 20, color: "#E8A598", delay: 0.7, dur: 11 },
-    { x: "85%", y: "38%", size: 16, color: "#D4907E", delay: 1.9, dur: 8  },
-    { x: "42%", y: "68%", size: 24, color: "#E8A598", delay: 0.3, dur: 7  },
-    { x: "78%", y: "55%", size: 18, color: "#D4907E", delay: 2.6, dur: 10 },
-    { x: "25%", y: "52%", size: 20, color: "#E8A598", delay: 1.3, dur: 9  },
-    { x: "60%", y: "15%", size: 22, color: "#D4907E", delay: 0.9, dur: 8  },
+const bgButterflies = [
+    { x: "5%",  y: "8%",  size: 28, color: "#F2CEC6", delay: 0,   dur: 7  },
+    { x: "90%", y: "12%", size: 24, color: "#EBBCB0", delay: 0.8, dur: 9  },
+    { x: "15%", y: "78%", size: 26, color: "#F2CEC6", delay: 0.4, dur: 8  },
+    { x: "82%", y: "72%", size: 22, color: "#EBBCB0", delay: 1.2, dur: 10 },
+    { x: "48%", y: "4%",  size: 20, color: "#F2CEC6", delay: 0.6, dur: 6  },
+    { x: "6%",  y: "45%", size: 18, color: "#EBBCB0", delay: 1.8, dur: 9  },
+    { x: "93%", y: "48%", size: 20, color: "#F2CEC6", delay: 0.2, dur: 8  },
+    { x: "30%", y: "88%", size: 22, color: "#EBBCB0", delay: 1.4, dur: 7  },
+    { x: "70%", y: "90%", size: 18, color: "#F2CEC6", delay: 0.9, dur: 9  },
+    { x: "22%", y: "18%", size: 16, color: "#EBBCB0", delay: 2.1, dur: 8  },
+    { x: "75%", y: "22%", size: 20, color: "#F2CEC6", delay: 0.5, dur: 7  },
+    { x: "55%", y: "92%", size: 16, color: "#EBBCB0", delay: 1.6, dur: 10 },
+    { x: "38%", y: "35%", size: 22, color: "#F2CEC6", delay: 1.1, dur: 8  },
+    { x: "62%", y: "55%", size: 18, color: "#EBBCB0", delay: 2.4, dur: 9  },
+    { x: "12%", y: "32%", size: 20, color: "#F2CEC6", delay: 0.7, dur: 11 },
+    { x: "85%", y: "38%", size: 16, color: "#EBBCB0", delay: 1.9, dur: 8  },
+    { x: "42%", y: "68%", size: 24, color: "#F2CEC6", delay: 0.3, dur: 7  },
+    { x: "78%", y: "55%", size: 18, color: "#EBBCB0", delay: 2.6, dur: 10 },
+    { x: "25%", y: "52%", size: 20, color: "#F2CEC6", delay: 1.3, dur: 9  },
+    { x: "60%", y: "15%", size: 22, color: "#EBBCB0", delay: 0.9, dur: 8  },
   ];
 
   return (
@@ -295,16 +295,16 @@ const MiniLanding = ({ onEnter }) => {
           <path d="M60 35 C70 42 85 55 92 65 C88 65 78 55 60 38Z" fill="#F2B8AD" opacity="0.8"/>
           <ellipse cx="60" cy="35" rx="7" ry="6" fill="#E8A598"/>
         </svg>
-        {[
-          { top: "5%",  left: "-28px", delay: 0,   size: 16 },
-          { top: "40%", right: "-24px", delay: 0.6, size: 14 },
-          { bottom: "15%", left: "-22px", delay: 1.2, size: 15 },
+     {[
+          { top: "5%",  left: "-28px", delay: 0,   size: 16, color: "#F2CEC6" },
+          { top: "40%", right: "-24px", delay: 0.6, size: 14, color: "#EBBCB0" },
+          { bottom: "15%", left: "-22px", delay: 1.2, size: 15, color: "#F2CEC6" },
         ].map((b, i) => (
           <motion.div key={i}
             style={{ position: "absolute", top: b.top, left: b.left, right: b.right, bottom: b.bottom, zIndex: 4, pointerEvents: "none" }}
             animate={{ y: [0, -8, 0], rotate: [0, 8, -8, 0], opacity: [0.5, 0.9, 0.5] }}
             transition={{ duration: 3 + i, repeat: Infinity, delay: b.delay }}>
-            <FlapButterfly color="#F2B8AD" size={b.size} delay={b.delay} />
+            <FlapButterfly color={b.color} size={b.size} delay={b.delay} />
           </motion.div>
         ))}
       </motion.div>

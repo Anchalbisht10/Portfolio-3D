@@ -257,32 +257,47 @@ const Hero = () => {
             <ellipse cx="60" cy="35" rx="4" ry="3.5" fill="#F5C5BC"/>
           </svg>
 
-          {/* Small butterflies */}
-          {[
-            { top: "10%", left: "-30px", delay: 0, size: 20 },
-            { top: "30%", right: "-25px", delay: 0.8, size: 16 },
-            { bottom: "20%", left: "-20px", delay: 1.5, size: 18 },
-            { bottom: "10%", right: "-20px", delay: 0.4, size: 14 },
-          ].map((b, i) => (
-            <motion.div key={i}
-              style={{
-                position: "absolute",
-                top: b.top, left: b.left, right: b.right, bottom: b.bottom,
-                zIndex: 2, pointerEvents: "none",
-              }}
-              animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0], opacity: [0.5, 0.9, 0.5] }}
-              transition={{ duration: 3 + i, repeat: Infinity, delay: b.delay }}
-            >
-              <svg width={b.size} height={b.size} viewBox="0 0 40 40" fill="none">
-                <ellipse cx="14" cy="16" rx="12" ry="8" fill="#F2B8AD" opacity="0.7" transform="rotate(-20 14 16)"/>
-                <ellipse cx="14" cy="26" rx="9" ry="6" fill="#E8A598" opacity="0.6" transform="rotate(20 14 26)"/>
-                <ellipse cx="26" cy="16" rx="12" ry="8" fill="#F2B8AD" opacity="0.7" transform="rotate(20 26 16)"/>
-                <ellipse cx="26" cy="26" rx="9" ry="6" fill="#E8A598" opacity="0.6" transform="rotate(-20 26 26)"/>
-                <ellipse cx="20" cy="20" rx="1.5" ry="7" fill="#2C2C2C" opacity="0.3"/>
-              </svg>
-            </motion.div>
-          ))}
-
+         {/* Small butterflies */}
+{[
+  { top: "10%", left: "-30px", delay: 0, size: 20 },
+  { top: "30%", right: "-25px", delay: 0.8, size: 16 },
+  { bottom: "20%", left: "-20px", delay: 1.5, size: 18 },
+  { bottom: "10%", right: "-20px", delay: 0.4, size: 14 },
+].map((b, i) => (
+  <motion.div key={i}
+    style={{
+      position: "absolute",
+      top: b.top, left: b.left, right: b.right, bottom: b.bottom,
+      zIndex: 2, pointerEvents: "none",
+    }}
+    animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0], opacity: [0.5, 0.9, 0.5] }}
+    transition={{ duration: 3 + i, repeat: Infinity, delay: b.delay }}
+  >
+    <svg width={b.size} height={b.size} viewBox="0 0 40 40" fill="none">
+      <motion.ellipse cx="14" cy="16" rx="12" ry="8" fill="#F2CEC6" opacity="0.5" transform="rotate(-20 14 16)"
+        animate={{ scaleX: [1, 0.3, 1], scaleY: [1, 1.1, 1] }}
+        transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut", delay: b.delay }}
+        style={{ transformOrigin: "20px 20px" }}
+      />
+      <motion.ellipse cx="14" cy="26" rx="9" ry="6" fill="#EBBCB0" opacity="0.4" transform="rotate(20 14 26)"
+        animate={{ scaleX: [1, 0.3, 1], scaleY: [1, 1.1, 1] }}
+        transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut", delay: b.delay }}
+        style={{ transformOrigin: "20px 20px" }}
+      />
+      <motion.ellipse cx="26" cy="16" rx="12" ry="8" fill="#F2CEC6" opacity="0.5" transform="rotate(20 26 16)"
+        animate={{ scaleX: [1, 0.3, 1], scaleY: [1, 1.1, 1] }}
+        transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut", delay: b.delay }}
+        style={{ transformOrigin: "20px 20px" }}
+      />
+      <motion.ellipse cx="26" cy="26" rx="9" ry="6" fill="#EBBCB0" opacity="0.4" transform="rotate(-20 26 26)"
+        animate={{ scaleX: [1, 0.3, 1], scaleY: [1, 1.1, 1] }}
+        transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut", delay: b.delay }}
+        style={{ transformOrigin: "20px 20px" }}
+      />
+      <ellipse cx="20" cy="20" rx="1.5" ry="7" fill="#2C2C2C" opacity="0.4"/>
+    </svg>
+  </motion.div>
+))}
           {/* Floating quote card */}
           <motion.div
             animate={{ y: [0, -8, 0] }}
